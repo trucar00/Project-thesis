@@ -6,8 +6,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-df = pd.read_csv("Processed_AIS/Resampled/2024-02.csv")
+df = pd.read_csv("Processed_AIS/Cleaned/2024-03.csv")
 df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
+
+print(df["trajectory_id"].unique(), df["trajectory_id"].nunique())
 
 # Loop over trajectories
 for _, d in df.groupby("trajectory_id"):

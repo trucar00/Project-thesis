@@ -194,32 +194,27 @@ def all(df):
     return df
 
 def main():
-    df = pd.read_parquet("Processed_AIS/Concatenated/2024-02.parquet", engine="pyarrow")
-    print(df.shape)
-    df = remove_invalid(df)
-    print(df.shape)
-    df = remove_stationary(df)
-    print(df.shape)
-    df = extract_trajectories(df)
-    print(df.shape)
-    
-    df = remove_sparse_trajectories(df)
-    print(df.shape)
-    df = remove_trajectories_few_instances(df)
-    print(df.shape)
-    df = reindex_trajectory_ids(df)
-    df = remove_duplicate_timestamps(df)
-    df = remove_outlier_positions(df)
-    df.to_csv("Processed_AIS/Resampled/2024-02.csv", index=False)
+    start = time()
+
+    for month in range(1,13):
+        getfile = f"Processed_AIS/Concatenated/2024-{month:02d}.parquet"
+        savefile = f"Processed_AIS/Cleaned/2024-{month:02d}.csv"
+        if os.path.exists(getfile):
+            print("Cleaning up: ", getfile)
+            df = pd.read_parquet(getfile, engine="pyarrow")
+            df = all(df)
+            df.to_csv(savefile, index=False)
+            print("Saved cleaned data to: ", savefile)          
+        else:
+            print("Missing: ", getfile)
+
+    end = time()
+    print("Done! It took: ", (end-start)/60, " minutes.")
 
     return
 
 if __name__ == "__main__":
     main()
-    #print(haversine(69.65481, 18.970306, 69.60507, 18.88542, 1))
-    #df = pd.read_csv("Processed_AIS/Resampled/2024-01_02.csv")
-    #df = remove_outlier_positions(df)
-    #df.to_csv("test2.csv")
     
 # TODO
 # Remove ships with too few instances after each other. There should be some consecutive instances over some period of time. Maybe filtering out ships who sends out ais too rarely

@@ -1,3 +1,6 @@
 May need to enlarge the sample space to capture also large fishing vessels far out at sea. Fex vessels fishing around bjørnøya
 
-HELLO
+Nice trajectories:
+
+-- Date -- Trajectory-ID -- Method? -- Comment --
+   24-03    257309220-0 --  Purse seiner -- Clear circles
