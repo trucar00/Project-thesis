@@ -1,15 +1,16 @@
 import pandas as pd
 import folium
 
-df = pd.read_csv("Processed_AIS/Cleaned/2024-03.csv")
+df = pd.read_csv("Processed_AIS/Resampled/2024-05.csv")
+#df = pd.read_csv("resampled_traj_inter.csv")
 
 #print(df["trajectory_id"].unique())
 
-df1 = df.loc[df["trajectory_id"] == "257128000-0"]
-df2 = df.loc[df["trajectory_id"] == "257309220-0"]
-df3 = df.loc[df["trajectory_id"] == "257446500-0"] 
-df4 = df.loc[df["trajectory_id"] == "257446500-1"]
-df5 = df.loc[df["trajectory_id"] == "257541600-0"] 
+df1 = df.loc[df["trajectory_id"] == "257046470-0"]
+df2 = df.loc[df["trajectory_id"] == "257070440-0"]
+df3 = df.loc[df["trajectory_id"] == "257149000-0"] 
+df4 = df.loc[df["trajectory_id"] == "257386000-0"]
+df5 = df.loc[df["trajectory_id"] == "257506600-0"] 
 
 # Plotting on a map
 m = folium.Map(location=[df['lat'].iloc[0], df['lon'].iloc[0]], zoom_start=12)
@@ -31,9 +32,12 @@ for i, row in df4.iterrows():
 for i, row in df5.iterrows():
     folium.CircleMarker(location=[row['lat'], row['lon']], radius=2, color="yellow").add_to(m)
 
-#folium.CircleMarker(location=[69.65481, 18.970306], radius=2, color="black").add_to(m)
+#folium.CircleMarker(location=[70.06204, 20.918283], radius=4, color="black").add_to(m)
+#folium.CircleMarker(location=[70.06133, 20.91314], radius=4, color="black").add_to(m)
 
 
-m.save("Maps/concat_resample_mar.html")
+m.save("Maps/resampled_may.html")
 m
 
+#20.918283,70.06204
+# 20.91314,70.06133

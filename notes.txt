@@ -1,4 +1,13 @@
-May need to enlarge the sample space to capture also large fishing vessels far out at sea. Fex vessels fishing around bjørnøya
+Done: Data preprocessing, cleaned out outliers, removed points where vessel is stationary (harbor), extracted trajectories for the same vessel.
+Dropped all vessels with rare messages, both not often enough and too few instances (too short trips). Downsampled to 30s interval, with linear interpolation
+
+
+May need to enlarge the sample space to capture also large fishing vessels far out at sea. Fex vessels fishing around bjørnøya.
+
+From the resampled datasets, create a training dataframe. Speed, COG, ROT, LAT, LON. Divide trajectories into 1h / 2h chunks (what is a reasonable time?).
+Autoencoder needs to be trained on same size time intervals.
+
+Plot all the trajectories first and last point to see if any ships are far north. 
 
 Nice trajectories:
 

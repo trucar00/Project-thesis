@@ -64,16 +64,3 @@ def resample(df, step="1min"):
     return resampled
 
 
-
-""" directory = "Z:date_utc=2024-01-01"
-
-for entry in os.scandir(directory):
-    if entry.is_file() and entry.name.endswith(".parquet"):
-        print(entry.path)
-        try:
-            readFilterSave(entry.path, "Processed_AIS/test_2024_01_01.parquet")
-            #df = pd.read_parquet(entry.path, engine="pyarrow")
-            #print(df.head())
-        except:
-            print(entry.path, " is not a parquet file.") """
-

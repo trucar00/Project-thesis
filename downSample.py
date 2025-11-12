@@ -1,8 +1,10 @@
 ## Code for downsampling AIS data
 
 import pandas as pd
+from time import time
+import os
 
-def resample(df, step="30s"):
+""" def resample(df, step="30s"):
     print("Resampling")
     df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
     #"df["mmsi"] = df["mmsi"].astype("int64")
@@ -29,9 +31,76 @@ def resample(df, step="30s"):
 
 
 df = pd.read_csv("Processed_AIS/Cleaned/2024-01.csv")
-df_resampled = resample(df, step="30s")
-print(df_resampled.head())
-print(df_resampled.tail())
+#df_resampled = resample(df, step="30s")
 
-# Something off with the mmsi. Want to downsample for every mmsi. Problem is that if step is 30s and we start at first instance for mmsi x it will have a fixed stepsize 30s.
-# So for the next 30s if an AIS-message dont align with the step it gives NaN values. Some other way to resample?
+
+def downsample_ais(df, step="30s"):
+    # Ensure datetime format
+    df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
+    df = df.sort_values(["trajectory_id", "date_time_utc"])
+    df = df.set_index("date_time_utc")
+
+    # Resample each MMSI separately
+    resampled = (
+        df.groupby("trajectory_id", group_keys=False)
+          .apply(lambda g: g.resample(step, origin=g.index.min()).first())
+    )
+
+    # Fill in MMSI (lost due to NaN in resampling)
+    resampled["mmsi"] = resampled["mmsi"].fillna(method="ffill").astype("int64")
+    resampled = resampled.reset_index()
+
+    return resampled """
+
+def downsample(df, step="30s"):
+    # Ensure datetime format
+    df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
+    df = df.sort_values(["trajectory_id", "date_time_utc"])
+    df = df.set_index("date_time_utc")
+
+    def resample_and_interpolate(g):
+        # Resample regularly
+        g_res = g.resample(step, origin=g.index.min()).first()
+
+        # Interpolate only numeric columns (lon, lat, speed, etc.)
+        num_cols = g_res.select_dtypes(include="number").columns
+        g_res[num_cols] = g_res[num_cols].interpolate(method="linear")
+
+        # Fill remaining NaNs (like mmsi, ship_name) via forward/backward fill
+        g_res = g_res.ffill().bfill()
+        return g_res
+
+    # Apply per trajectory
+    resampled = df.groupby("trajectory_id", group_keys=False).apply(resample_and_interpolate)
+
+    # Ensure mmsi is valid integer
+    resampled["mmsi"] = resampled["mmsi"].astype("int64")
+
+    # Reset index for output
+    resampled = resampled.reset_index()
+
+    return resampled
+
+
+def main():
+    start = time()
+
+    for month in range(1,13):
+        getfile = f"Processed_AIS/Cleaned/2024-{month:02d}.csv"
+        savefile = f"Processed_AIS/Resampled/2024-{month:02d}.csv"
+        if os.path.exists(getfile):
+            print("Resampling: ", getfile)
+            df = pd.read_csv(getfile, engine="pyarrow")
+            df = downsample(df)
+            df.to_csv(savefile, index=False)
+            print(f"Saved resampled data for 2024-{month:02d} to {savefile}")          
+        else:
+            print("Missing: ", getfile)
+
+    end = time()
+    print("Done! It took: ", (end-start)/60, " minutes.")
+    return
+
+if __name__ == "__main__":
+    #main()
+    print("Already created resampled csv's")
