@@ -7,7 +7,9 @@ May need to enlarge the sample space to capture also large fishing vessels far o
 From the resampled datasets, create a training dataframe. Speed, COG, ROT, LAT, LON. Divide trajectories into 1h / 2h chunks (what is a reasonable time?).
 Autoencoder needs to be trained on same size time intervals.
 
-Plot all the trajectories first and last point to see if any ships are far north. 
+
+- Not many vessels far north, could be due to the 5-day sample from each month -> more days
+- Also, vessels gets cutted off when south of LAT 62 -> seem to be many ships in this area. Cutoff further south? And remove all vessels with trajectory outside the region
 
 Nice trajectories:
 

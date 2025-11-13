@@ -37,7 +37,3 @@ for _, d in df.groupby("trajectory_id"):
     fig.suptitle(f"MMSI: {mmsi} | Trajectory {d['trajectory_id'].iloc[0]}", fontsize=12)
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     plt.show()
-
-
-# REMAININ OUTLIERS
-# 257570500-0
