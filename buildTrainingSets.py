@@ -1,5 +1,5 @@
 import pandas as pd
-import time
+from time import time
 import os
 
 # PLAN
@@ -20,9 +20,10 @@ def build(df):
 
     df["del_cog"] = df.groupby("trajectory_id")["cog"].diff().apply(angle_wrap)
     df["del_cog"] = df["del_cog"].fillna(0)
+    df["accel_bwd"] = df["accel_bwd"].fillna(0)
 
     window_length = pd.Timedelta(hours=2)
-    step = pd.Timedelta(minutes=10) # Good value?
+    step = pd.Timedelta(minutes=30) # Good value?
     
     all_windows = []
 
@@ -37,7 +38,7 @@ def build(df):
             window_df = d[(d["date_time_utc"] >= current)
                          & (d["date_time_utc"] < (current + window_length))].copy()
             
-            feature_df = window_df[["trajectory_id", "mmsi", "date_time_utc", "speed", "del_cog", "rot"]].copy()
+            feature_df = window_df[["trajectory_id", "mmsi", "date_time_utc", "speed", "del_cog", "rot", "accel_bwd"]].copy()
             feature_df["window_start"] = current
             feature_df["window_end"] = current + window_length
             feature_df["avg_speed"] = window_df["speed"].mean()
@@ -48,7 +49,7 @@ def build(df):
             current += step
 
     df_all = pd.concat(all_windows, ignore_index=True)
-    df_all = df_all[["trajectory_id", "mmsi", "window_start", "window_end", "avg_speed", "std_speed", "date_time_utc", "speed", "del_cog", "rot"]] # Add acceleration?
+    df_all = df_all[["trajectory_id", "mmsi", "window_start", "window_end", "avg_speed", "std_speed", "date_time_utc", "speed", "del_cog", "rot", "accel_bwd"]] # Add acceleration?
     return df_all
 
 
@@ -56,14 +57,15 @@ def main():
     start = time()
 
     for month in range(1,13):
-        getfile = f"Processed_AIS/Concatenated/2024-{month:02d}.parquet"
-        savefile = f"Processed_AIS/Cleaned2/2024-{month:02d}.csv" # Remove
+        getfile = f"Processed_AIS/Resampled2/2024-{month:02d}.csv"
+        savefile = f"Featureset/2024-{month:02d}.csv"
+
         if os.path.exists(getfile):
-            print("Cleaning up: ", getfile)
-            df = pd.read_parquet(getfile, engine="pyarrow")
-            df = all(df)
-            df.to_csv(savefile, index=False)
-            print("Saved cleaned data to: ", savefile)          
+            print("Building features for: ", getfile)
+            df = pd.read_csv(getfile, engine="pyarrow")
+            df_feats = build(df)
+            df_feats.to_csv(savefile, index=False)
+            print("Saved features to: ", savefile)          
         else:
             print("Missing: ", getfile)
 
