@@ -7,13 +7,13 @@ from time import time
 start = time()
 
 for month in range(1,13):
-    for day in range(1,6):
+    for day in range(6,11):
         filepath = f"Z:date_utc=2024-{month:02d}-{day:02d}"
         if os.path.exists(filepath):
             for entry in os.scandir(filepath):
                 if entry.is_file() and entry.name.endswith(".parquet"):
                     print("Processing file: ", entry.path)
-                    dataProcessing.readFilterSave(entry.path, f"Processed_AIS/Parquets/2024-{month:02d}-{day:02d}.parquet")
+                    dataProcessing.readFilterSave(entry.path, f"Processed_AIS/Enlarged_parquets/2024-{month:02d}-{day:02d}.parquet")
                     
         else:
             print("Missing: ", filepath)

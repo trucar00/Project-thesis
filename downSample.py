@@ -86,8 +86,8 @@ def main():
     start = time()
 
     for month in range(1,13):
-        getfile = f"Processed_AIS/Cleaned/2024-{month:02d}.csv"
-        savefile = f"Processed_AIS/Resampled/2024-{month:02d}.csv"
+        getfile = f"Processed_AIS/Cleaned2/2024-{month:02d}.csv"
+        savefile = f"Processed_AIS/Resampled2/2024-{month:02d}.csv"
         if os.path.exists(getfile):
             print("Resampling: ", getfile)
             df = pd.read_csv(getfile, engine="pyarrow")
@@ -102,5 +102,5 @@ def main():
     return
 
 if __name__ == "__main__":
-    #main()
-    print("Already created resampled csv's")
+    main()
+    #print("Already created resampled csv's")

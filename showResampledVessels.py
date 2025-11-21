@@ -1,16 +1,16 @@
 import pandas as pd
 import folium
 
-df = pd.read_csv("Processed_AIS/Resampled/2024-05.csv")
+df = pd.read_csv("Processed_AIS/TrajLonger2h/2024-01.csv")
 #df = pd.read_csv("resampled_traj_inter.csv")
 
 #print(df["trajectory_id"].unique())
 
-df1 = df.loc[df["trajectory_id"] == "257046470-0"]
-df2 = df.loc[df["trajectory_id"] == "257070440-0"]
+df1 = df.loc[df["trajectory_id"] == "257020390-0"]
+df2 = df.loc[df["trajectory_id"] == "257108640-0"]
 df3 = df.loc[df["trajectory_id"] == "257149000-0"] 
-df4 = df.loc[df["trajectory_id"] == "257386000-0"]
-df5 = df.loc[df["trajectory_id"] == "257506600-0"] 
+df4 = df.loc[df["trajectory_id"] == "257258000-0"]
+df5 = df.loc[df["trajectory_id"] == "257570500-0"] 
 
 # Plotting on a map
 m = folium.Map(location=[df['lat'].iloc[0], df['lon'].iloc[0]], zoom_start=12)
@@ -36,7 +36,7 @@ for i, row in df5.iterrows():
 #folium.CircleMarker(location=[70.06133, 20.91314], radius=4, color="black").add_to(m)
 
 
-m.save("Maps/resampled_may.html")
+m.save("Maps/short_traj.html")
 m
 
 #20.918283,70.06204

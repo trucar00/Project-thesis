@@ -1,5 +1,4 @@
 import os
-import dataProcessing
 from time import time
 import pandas as pd
 import numpy as np
@@ -54,16 +53,20 @@ def extract_trajectories(df, time_threshold="30min"):
     df["trajectory_id"] = df["mmsi"].astype(str) + "-" + df["traj_id"].astype(str)
 
     return df.drop(columns=["dt"])
+
+def split_sparse_trajectories(df, interval=30): # Many trajectories have breaks or pauses in the messages, rather than discarding them, we break them up.
+    df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
+    df = df.sort_values(["trajectory_id", "date_time_utc"])
+    df["dt"] = df.groupby("trajectory_id")["date_time_utc"].diff().dt.total_seconds()
     
+    # Increment a chunk counter whenever dt > interval
+    df["chunk_id"] = (df["dt"] > interval).groupby(df["trajectory_id"]).cumsum()
+    
+    # New trajectory IDs per chunk
+    df["trajectory_id"] = df["trajectory_id"] + "-" + df["chunk_id"].astype(str)
+    
+    return df.drop(columns=["dt", "chunk_id"])
 
-def resample(df, sample="1min"): # not finished
-    dfs = []
-    for _, g in df.groupby("mmsi"):
-
-        g = g.set_index("date_time_utc")
-        g = g.resample(sample, origin="start").first()
-        print(g)
-    return dfs
 
 def remove_sparse_trajectories(df, interval=30):
     print(f"Removing trajectories with message interval > {interval} seconds")
@@ -126,7 +129,7 @@ def haversine(lat1, lon1, lat2, lon2, dt):
 
     return dist, speed
 
-def remove_outlier_positions(df, max_speed = 30):
+def remove_outlier_positions(df, max_speed = 20):
     print("Removing trajectory outliers (impossible jumps)")
     df = df.sort_values(["trajectory_id", "date_time_utc"])
     df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
@@ -145,19 +148,19 @@ def remove_outlier_positions(df, max_speed = 30):
     df["del_speed_fwd"] = df.groupby("trajectory_id")["speed"].diff().shift(-1)
     df["del_speed_bwd"] = df.groupby("trajectory_id")["speed"].diff()
     
-    df["accel_fwd"] = (df["del_speed_fwd"] / 1.94384) / df["dt_fwd"]
+    df["accel_fwd"] = (df["del_speed_fwd"] / 1.94384) / df["dt_fwd"] # clean up the ms to knots thing?
     df["accel_bwd"] = (df["del_speed_bwd"] / 1.94384) / df["dt_bwd"]
 
 
     jump_mask = (df["speed_bwd"] > max_speed) & (df["speed_fwd"] > max_speed)
-    accel_mask = (df["accel_fwd"].abs() > 0.15) & (df["accel_bwd"].abs() > 0.15)
+    accel_mask = (df["accel_fwd"].abs() > 0.10) & (df["accel_bwd"].abs() > 0.10)
 
     outlier_mask = jump_mask | accel_mask
 
     df_filtered = df[~outlier_mask].drop(columns=[
         "dt_fwd", "dt_bwd",
         "lat_prev", "lon_prev", "lat_next", "lon_next",
-        "del_m_fwd", "del_m_bwd", "del_speed_fwd", "del_speed_bwd", "speed_fwd", "speed_bwd"
+        "del_m_fwd", "del_m_bwd", "del_speed_fwd", "del_speed_bwd", "speed_fwd", "speed_bwd", "accel_fwd"
     ])
 
     print(f"Removed {outlier_mask.sum():,} outlier points")
@@ -182,15 +185,35 @@ def reindex_trajectory_ids(df):
     df = df.drop(columns=["trajectory_id_new"])
     return df
 
+def remove_short_trajectories(df):
+    df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
+
+    durations = (
+    df.groupby("trajectory_id")["date_time_utc"]
+      .agg(["min", "max"])
+      .assign(duration=lambda x: x["max"] - x["min"])
+    )
+
+    valid_traj_ids = durations[durations["duration"] >= pd.Timedelta(hours=2)].index
+    df_filtered = df[df["trajectory_id"].isin(valid_traj_ids)]
+    print("Original:", df["trajectory_id"].nunique())
+    print("Filtered:", df_filtered["trajectory_id"].nunique())
+
+    return df_filtered
+
+
 def all(df):
     df = remove_invalid(df)
     df = remove_stationary(df)
     df = extract_trajectories(df)
-    df = remove_sparse_trajectories(df)
-    df = remove_trajectories_few_instances(df)
-    df = reindex_trajectory_ids(df)
+    df = split_sparse_trajectories(df)
+    #df = remove_sparse_trajectories(df)
+    #df = remove_trajectories_few_instances(df)
+    #df = reindex_trajectory_ids(df)
     df = remove_duplicate_timestamps(df)
     df = remove_outlier_positions(df)
+    df = remove_short_trajectories(df)
+    df = reindex_trajectory_ids(df)
     return df
 
 def main():
@@ -198,7 +221,7 @@ def main():
 
     for month in range(1,13):
         getfile = f"Processed_AIS/Concatenated/2024-{month:02d}.parquet"
-        savefile = f"Processed_AIS/Cleaned/2024-{month:02d}.csv"
+        savefile = f"Processed_AIS/Cleaned2/2024-{month:02d}.csv" # Remove
         if os.path.exists(getfile):
             print("Cleaning up: ", getfile)
             df = pd.read_parquet(getfile, engine="pyarrow")
@@ -215,6 +238,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #df = pd.read_csv("2024-01.csv")
+    #df = remove_short_trajectories(df)
+    #df.to_csv("removedShort.csv")
     
 # TODO
 # Remove ships with too few instances after each other. There should be some consecutive instances over some period of time. Maybe filtering out ships who sends out ais too rarely
