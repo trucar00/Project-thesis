@@ -1,6 +1,8 @@
 import pandas as pd
 from time import time
 import os
+import cleanAIS
+from sklearn.preprocessing import StandardScaler
 
 # PLAN
 # Build features for all trajectories. Use sliding window.
@@ -11,9 +13,10 @@ import os
 # speed, mean speed, std speed, acceleration
 # deltaCOG, dCOG/dt, ROT
 
-def angle_wrap(a): # Understand this
+def angle_wrap(a):
     
     return (a + 180) % 360 - 180
+
 
 def build(df):
     df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
@@ -22,10 +25,12 @@ def build(df):
     df["del_cog"] = df["del_cog"].fillna(0)
     df["accel_bwd"] = df["accel_bwd"].fillna(0)
 
-    window_length = pd.Timedelta(hours=2)
-    step = pd.Timedelta(minutes=30) # Good value?
+    window_length = pd.Timedelta(hours=3)
+    step = pd.Timedelta(minutes=60) # Good value?
     
     all_windows = []
+    
+    
 
     for traj_id, d in df.groupby("trajectory_id"):
         d = d.sort_values("date_time_utc").reset_index(drop=True)
@@ -33,12 +38,18 @@ def build(df):
         start = d["date_time_utc"].min()
         end = d["date_time_utc"].max()
         current = start
+        window_id = 0
 
         while current + window_length <= end:
             window_df = d[(d["date_time_utc"] >= current)
                          & (d["date_time_utc"] < (current + window_length))].copy()
             
-            feature_df = window_df[["trajectory_id", "mmsi", "date_time_utc", "speed", "del_cog", "rot", "accel_bwd"]].copy()
+            window_df["trajectory_id"] = window_df["trajectory_id"].astype(str) + "-" + str(window_id)
+            window_df["lon_rel"] = window_df["lon"] - window_df["lon"].iloc[0]
+            window_df["lat_rel"] = window_df["lat"] - window_df["lat"].iloc[0]
+            
+
+            feature_df = window_df[["trajectory_id", "mmsi", "date_time_utc", "speed", "del_cog", "rot", "accel_bwd", "lon_rel", "lat_rel"]].copy()
             feature_df["window_start"] = current
             feature_df["window_end"] = current + window_length
             feature_df["avg_speed"] = window_df["speed"].mean()
@@ -47,18 +58,47 @@ def build(df):
             all_windows.append(feature_df)
 
             current += step
+            window_id += 1
 
     df_all = pd.concat(all_windows, ignore_index=True)
-    df_all = df_all[["trajectory_id", "mmsi", "window_start", "window_end", "avg_speed", "std_speed", "date_time_utc", "speed", "del_cog", "rot", "accel_bwd"]] # Add acceleration?
+    df_all = cleanAIS.reindex_trajectory_ids(df_all)
+    df_all = df_all.sort_values(by=["trajectory_id", "window_start"])
+
+    df_all = df_all[["trajectory_id", "mmsi", "window_start", "window_end", "avg_speed", "std_speed", 
+                     "date_time_utc", "speed", "del_cog", "rot", "accel_bwd", "lon_rel", "lat_rel"]] # Add acceleration?
     return df_all
+
+def createCommon():
+    dfs = []
+    for month in range(1,13):
+        filepath = f"Featureset/Normalized/2024-{month:02d}.csv"
+        df = pd.read_csv(filepath)
+        df["trajectory_id"] = (df["trajectory_id"].astype(str) + "-" + f"{month}")
+        print(df["trajectory_id"].iloc[0])
+        dfs.append(df)
+
+    concat_df = pd.concat(dfs, ignore_index=True)
+    scaler = StandardScaler()
+    scaled_cols = ["speed", "del_cog", "rot", "accel_bwd"]
+    concat_df[scaled_cols] = scaler.fit_transform(concat_df[scaled_cols])
+    concat_df.rename(columns={
+        "speed": "z_speed",
+        "del_cog": "z_del_cog",
+        "rot": "z_rot",
+        "accel_bwd": "z_accel_bwd"
+    }, inplace=True)
+    
+    concat_df.to_csv("Featureset/2024FeatsNorm.csv", index=False)
+
+    return "Done!"
 
 
 def main():
     start = time()
 
     for month in range(1,13):
-        getfile = f"Processed_AIS/Resampled2/2024-{month:02d}.csv"
-        savefile = f"Featureset/2024-{month:02d}.csv"
+        getfile = f"Processed_AIS/Resampled3h/2024-{month:02d}.csv"
+        savefile = f"Featureset/Normalized/2024-{month:02d}.csv"
 
         if os.path.exists(getfile):
             print("Building features for: ", getfile)
@@ -75,3 +115,12 @@ def main():
 
 if __name__ == "__main__":
     main()
+    createCommon()
+    #print(350%360)
+    #print(angle_wrap(350))
+    
+
+
+""" window_df["z_speed"] = (window_df["speed"] - window_df["speed"].mean()) / window_df["speed"].std()
+            window_df["zdel_cog"] = (window_df["del_cog"] - window_df["del_cog"].mean()) / window_df["del_cog"].std()
+            window_df["z_rot"] = (window_df["rot"] - window_df["rot"].mean()) / window_df["rot"].std() """

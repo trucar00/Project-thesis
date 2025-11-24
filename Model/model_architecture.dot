@@ -1,0 +1,22 @@
+digraph G {
+rankdir=TB;
+concentrate=true;
+dpi=200;
+splines=ortho;
+node [shape=record];
+1609055050384 [label=<<table border="0" cellborder="1" bgcolor="black" cellpadding="10"><tr><td colspan="2" bgcolor="black"><font point-size="16" color="white"><b>input_layer</b> (InputLayer)</font></td></tr><tr><td bgcolor="white"><font point-size="14">Output shape: <b>(None, 9, 1)</b></font></td></tr></table>>, fontname=Helvetica, border=0, margin=0];
+1609055052736 [label=<<table border="0" cellborder="1" bgcolor="black" cellpadding="10"><tr><td colspan="2" bgcolor="black"><font point-size="16" color="white"><b>lstm</b> (LSTM)</font></td></tr><tr><td bgcolor="white"><font point-size="14">Input shape: <b>(None, 9, 1)</b></font></td><td bgcolor="white"><font point-size="14">Output shape: <b>(None, 100)</b></font></td></tr></table>>, fontname=Helvetica, border=0, margin=0];
+1609055056768 [label=<<table border="0" cellborder="1" bgcolor="black" cellpadding="10"><tr><td colspan="2" bgcolor="black"><font point-size="16" color="white"><b>repeat_vector</b> (RepeatVector)</font></td></tr><tr><td bgcolor="white"><font point-size="14">Input shape: <b>(None, 100)</b></font></td><td bgcolor="white"><font point-size="14">Output shape: <b>(None, 9, 100)</b></font></td></tr></table>>, fontname=Helvetica, border=0, margin=0];
+1609062988880 [label=<<table border="0" cellborder="1" bgcolor="black" cellpadding="10"><tr><td colspan="2" bgcolor="black"><font point-size="16" color="white"><b>repeat_vector_1</b> (RepeatVector)</font></td></tr><tr><td bgcolor="white"><font point-size="14">Input shape: <b>(None, 100)</b></font></td><td bgcolor="white"><font point-size="14">Output shape: <b>(None, 8, 100)</b></font></td></tr></table>>, fontname=Helvetica, border=0, margin=0];
+1609062985360 [label=<<table border="0" cellborder="1" bgcolor="black" cellpadding="10"><tr><td colspan="2" bgcolor="black"><font point-size="16" color="white"><b>lstm_1</b> (LSTM)</font></td></tr><tr><td bgcolor="white"><font point-size="14">Input shape: <b>(None, 9, 100)</b></font></td><td bgcolor="white"><font point-size="14">Output shape: <b>(None, 9, 100)</b></font></td></tr></table>>, fontname=Helvetica, border=0, margin=0];
+1609062989200 [label=<<table border="0" cellborder="1" bgcolor="black" cellpadding="10"><tr><td colspan="2" bgcolor="black"><font point-size="16" color="white"><b>lstm_2</b> (LSTM)</font></td></tr><tr><td bgcolor="white"><font point-size="14">Input shape: <b>(None, 8, 100)</b></font></td><td bgcolor="white"><font point-size="14">Output shape: <b>(None, 8, 100)</b></font></td></tr></table>>, fontname=Helvetica, border=0, margin=0];
+1609055057104 [label=<<table border="0" cellborder="1" bgcolor="black" cellpadding="10"><tr><td colspan="2" bgcolor="black"><font point-size="16" color="white"><b>time_distributed</b> (TimeDistributed)</font></td></tr><tr><td bgcolor="white"><font point-size="14">Input shape: <b>(None, 9, 100)</b></font></td><td bgcolor="white"><font point-size="14">Output shape: <b>(None, 9, 1)</b></font></td></tr></table>>, fontname=Helvetica, border=0, margin=0];
+1609063744208 [label=<<table border="0" cellborder="1" bgcolor="black" cellpadding="10"><tr><td colspan="2" bgcolor="black"><font point-size="16" color="white"><b>time_distributed_1</b> (TimeDistributed)</font></td></tr><tr><td bgcolor="white"><font point-size="14">Input shape: <b>(None, 8, 100)</b></font></td><td bgcolor="white"><font point-size="14">Output shape: <b>(None, 8, 1)</b></font></td></tr></table>>, fontname=Helvetica, border=0, margin=0];
+1609055050384 -> 1609055052736 [penwidth=2];
+1609055052736 -> 1609055056768 [penwidth=2];
+1609055052736 -> 1609062988880 [penwidth=2];
+1609055056768 -> 1609062985360 [penwidth=2];
+1609062988880 -> 1609062989200 [penwidth=2];
+1609062985360 -> 1609055057104 [penwidth=2];
+1609062989200 -> 1609063744208 [penwidth=2];
+}

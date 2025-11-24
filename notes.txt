@@ -3,9 +3,8 @@ Dropped all vessels with rare messages, both not often enough and too few instan
 
 IMPORTANT:
 with the remove sparse trajectories i have lost mnany interesting trajectories. Need rather to divide trajectories into 2h chunks and see if those are sparse. Not entire trajectories.
+- Think i fixed this
 
-
-May need to enlarge the sample space to capture also large fishing vessels far out at sea. Fex vessels fishing around bjørnøya.
 
 From the resampled datasets, create a training dataframe. Speed, COG, ROT, LAT, LON. Divide trajectories into 1h / 2h chunks (what is a reasonable time?).
 Autoencoder needs to be trained on same size time intervals.
@@ -27,8 +26,17 @@ Features:
 - Avoid raw COG: Using COG the model will treat straight line east as not equal to straigh line west. 
 - Use speed, delta COG and rot (arent del COG and ROT the same?) -> no delta COG is change in heading, rot is how fast are we turning on this timestep
 
+TODO:
+- Filter out trajectories with status = 7 , as this is means the vessel is engaged in fishing. = NOT RELIABLE
 
 Nice trajectories:
 
 -- Date -- Trajectory-ID -- Method? -- Comment --
    24-03    257309220-0 --  Purse seiner -- Clear circles
+
+
+
+   Env:
+   .\.venv\Scripts\Activate.ps1 run from project data folder, choose venv as environment
+
+   C:/Users/trulsc/AppData/Local/miniconda3/Scripts/activate -> conda activate clustering

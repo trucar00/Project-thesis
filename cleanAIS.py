@@ -185,7 +185,7 @@ def reindex_trajectory_ids(df):
     df = df.drop(columns=["trajectory_id_new"])
     return df
 
-def remove_short_trajectories(df):
+def remove_short_trajectories(df, h=3):
     df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
 
     durations = (
@@ -194,7 +194,7 @@ def remove_short_trajectories(df):
       .assign(duration=lambda x: x["max"] - x["min"])
     )
 
-    valid_traj_ids = durations[durations["duration"] >= pd.Timedelta(hours=2)].index
+    valid_traj_ids = durations[durations["duration"] >= pd.Timedelta(hours=h)].index
     df_filtered = df[df["trajectory_id"].isin(valid_traj_ids)]
     print("Original:", df["trajectory_id"].nunique())
     print("Filtered:", df_filtered["trajectory_id"].nunique())
@@ -212,7 +212,7 @@ def all(df):
     #df = reindex_trajectory_ids(df)
     df = remove_duplicate_timestamps(df)
     df = remove_outlier_positions(df)
-    df = remove_short_trajectories(df)
+    df = remove_short_trajectories(df) # This removes a lot of trajectories. So we are left with not sequential chunk ids etc
     df = reindex_trajectory_ids(df)
     return df
 
@@ -221,7 +221,7 @@ def main():
 
     for month in range(1,13):
         getfile = f"Processed_AIS/Concatenated/2024-{month:02d}.parquet"
-        savefile = f"Processed_AIS/Cleaned2/2024-{month:02d}.csv" # Remove
+        savefile = f"Processed_AIS/Cleaned3h/2024-{month:02d}.csv" # Remove
         if os.path.exists(getfile):
             print("Cleaning up: ", getfile)
             df = pd.read_parquet(getfile, engine="pyarrow")

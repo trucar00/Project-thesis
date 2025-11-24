@@ -2,7 +2,10 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("Processed_AIS/Resampled2/2024-03.csv")
+""" Found that the status flag 7 is not reliable. It is clear that fishing vessels engaged in fishing activity forget to set this flag. 
+And also forget to turn it off when done with fishing. This plot shows status flag 7 vessels in red and all fishing vessels (ship_type=30) trajectories (after cleaning) in blue."""
+
+df = pd.read_csv("./Processed_AIS/Resampled2/2024-03.csv")
 df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
 df.sort_values(by="date_time_utc")
 
