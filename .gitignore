@@ -2,3 +2,5 @@ Processed_AIS/
 Maps/
 __pycache__/
 Featureset/
+Model/trajectories.h5
+Model/latent_vectors.npy
