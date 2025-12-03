@@ -36,49 +36,57 @@ class TrajectoryGenerator(utils.Sequence):
         if self.shuffle:
             np.random.shuffle(self.indices)
 
-gen = TrajectoryGenerator("trajectories.h5", batch_size=64) 
+gen = TrajectoryGenerator("Data/trajectoriesNorm.h5", batch_size=64) 
 
 T = 360
-F = 6
-latent_dim = 16
+F = 8
+latent_dim = 32
 
 inp = Input(shape=(T, F))
 
 # ----- Encoder -----
-x = layers.Conv1D(32, 5, activation='relu', padding='same')(inp)
-x = layers.MaxPooling1D(2)(x)   # 180
-x = layers.Conv1D(64, 5, activation='relu', padding='same')(x)
-x = layers.MaxPooling1D(2)(x)   # 90
-x = layers.Conv1D(128, 5, activation='relu', padding='same')(x)
-x = layers.MaxPooling1D(3)(x)   # 30
+x = layers.Conv1D(filters=32, kernel_size=5, strides=1, activation='relu', padding='same')(inp)
+x = layers.BatchNormalization()(x)
+
+x = layers.Conv1D(filters=64, kernel_size=7, strides=2, activation='relu', padding='same')(x)
+x = layers.BatchNormalization()(x)
+
+x = layers.Conv1D(filters=128, kernel_size=9, strides=3, activation='relu', padding='same')(x)
+x = layers.BatchNormalization()(x)
 
 x = layers.Flatten()(x)
-latent = layers.Dense(latent_dim)(x)
+latent = layers.Dense(latent_dim, activation=None)(x)
 
 # ----- Decoder -----
-x = layers.Dense(30*128)(latent)
-x = layers.Reshape((30,128))(x)
-x = layers.UpSampling1D(3)(x)      # 90
-x = layers.Conv1D(64, 5, activation='relu', padding='same')(x)
-x = layers.UpSampling1D(2)(x)      # 180
-x = layers.Conv1D(32, 5, activation='relu', padding='same')(x)
-x = layers.UpSampling1D(2)(x)      # 360
+x = layers.Dense(60*128)(latent)
+x = layers.Reshape((60,128))(x)
 
-out = layers.Conv1D(F, 5, activation='linear', padding='same')(x)
+x = layers.UpSampling1D(3)(x)      # 60 -> 180
+x = layers.Conv1D(filters=128, kernel_size=5, activation='relu', padding='same')(x)
+
+x = layers.UpSampling1D(2)(x)      # 180 -> 360
+x = layers.Conv1D(filters=64, kernel_size=7, activation='relu', padding='same')(x)
+
+x = layers.Conv1D(filters=32, kernel_size=9, activation='relu', padding='same')(x)
+
+out = layers.Conv1D(filters=F, kernel_size=3, activation='linear', padding='same')(x)
 
 autoencoder = Model(inp, out)
 encoder = Model(inp, latent)
 
-autoencoder.compile(optimizer='adam', loss='mse')
+encoder.save("encoder_model.h5")
+autoencoder.save("autoencoder_model.h5")
+
+autoencoder.compile(optimizer='adam', loss='mae') # use MAE? L1
 autoencoder.summary()
 
 autoencoder.fit(
     gen,
-    epochs=25,
+    epochs=100,
     verbose=1
 )
 
-h5 = h5py.File("trajectories.h5", "r")
+h5 = h5py.File("Data/trajectoriesNorm.h5", "r")
 X = h5["X"]
 
 latent_vectors = []

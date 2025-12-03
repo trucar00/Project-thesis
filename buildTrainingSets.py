@@ -87,8 +87,9 @@ def createCommon():
         "rot": "z_rot",
         "accel_bwd": "z_accel_bwd"
     }, inplace=True)
-    
-    concat_df.to_csv("Featureset/2024FeatsNorm.csv", index=False)
+
+    #concat_df.to_csv("Featureset/2024FeatsNorm.csv", index=False)
+    concat_df.to_parquet("Featureset/2024Feats.parquet", engine="pyarrow", compression="snappy", index=False)
 
     return "Done!"
 
@@ -114,7 +115,7 @@ def main():
     return
 
 if __name__ == "__main__":
-    main()
+    #main()
     createCommon()
     #print(350%360)
     #print(angle_wrap(350))
