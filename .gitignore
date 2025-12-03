@@ -1,3 +1,8 @@
 Processed_AIS/
 Maps/
 __pycache__/
+Featureset/
+Model/trajectories.h5
+Model/Latent
+Figures/maritime_borders_norway.gml
+Figures/region2.eps
