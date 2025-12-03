@@ -28,7 +28,8 @@ ax.plot([0, 0, 40, 40], [88, 62, 62, 88], color="red", linewidth=1.2, label="Reg
 
 # Optional: mark the endpoints
 
-#plt.ylabel("Latitude")
-#plt.xlabel("Longitude")
+plt.ylabel("Latitude")
+plt.xlabel("Longitude")
+plt.savefig("Figures/region2.eps")
 plt.legend()
 plt.show()

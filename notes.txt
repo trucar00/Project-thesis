@@ -1,8 +1,10 @@
 Done: Data preprocessing, cleaned out outliers, removed points where vessel is stationary (harbor), extracted trajectories for the same vessel.
 Dropped all vessels with rare messages, both not often enough and too few instances (too short trips). Downsampled to 30s interval, with linear interpolation
 
+IMPORTANT:
+with the remove sparse trajectories i have lost mnany interesting trajectories. Need rather to divide trajectories into 2h chunks and see if those are sparse. Not entire trajectories.
+- Think i fixed this
 
-May need to enlarge the sample space to capture also large fishing vessels far out at sea. Fex vessels fishing around bjørnøya.
 
 From the resampled datasets, create a training dataframe. Speed, COG, ROT, LAT, LON. Divide trajectories into 1h / 2h chunks (what is a reasonable time?).
 Autoencoder needs to be trained on same size time intervals.
@@ -11,7 +13,30 @@ Autoencoder needs to be trained on same size time intervals.
 - Not many vessels far north, could be due to the 5-day sample from each month -> more days
 - Also, vessels gets cutted off when south of LAT 62 -> seem to be many ships in this area. Cutoff further south? And remove all vessels with trajectory outside the region
 
+
+Am I happy with the trajectory extraction and data cleaning? 
+Making now for first 10 days. Do i have any ships far north now? Do i need to be less aggressive with the data cleaning?
+Can also consider to take in 2023...
+Plot all trajectories before and after cleaning. Removed stationary and divided up into trajectories. What is left lsm.
+
+Make training sets
+Train the fucking thing
+
+Features:
+- Avoid raw COG: Using COG the model will treat straight line east as not equal to straigh line west. 
+- Use speed, delta COG and rot (arent del COG and ROT the same?) -> no delta COG is change in heading, rot is how fast are we turning on this timestep
+
+TODO:
+- Filter out trajectories with status = 7 , as this is means the vessel is engaged in fishing. = NOT RELIABLE
+
 Nice trajectories:
 
 -- Date -- Trajectory-ID -- Method? -- Comment --
    24-03    257309220-0 --  Purse seiner -- Clear circles
+
+
+
+   Env:
+   .\.venv\Scripts\Activate.ps1 run from project data folder, choose venv as environment
+
+   C:/Users/trulsc/AppData/Local/miniconda3/Scripts/activate -> conda activate clustering

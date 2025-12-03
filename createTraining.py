@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Create 1h chunks for each trajectory_id. Start from first timestamp for that trajectory_id and then divide up into as many 1h intervals as possible. 
+# Create 2h? chunks for each trajectory_id. Start from first timestamp for that trajectory_id and then divide up into as many 1h intervals as possible. 
 # If at some point the next one hour interval is outside the timestamp for that trajectory_id, just throw it away (likely close to harbor anyways).
 
 df = pd.read_csv("Processed_AIS/Resampled/2024-01.csv")
