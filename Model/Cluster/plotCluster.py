@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import json
 
 # -- Plot example trajectories of the 1000 ish --
-with open("traj_clusters.json", "r") as f:
+with open("clusters3.json", "r") as f:
     cluster_dict = json.load(f)
 
 # This is the island cluster (~1000 trajectories)
@@ -12,7 +12,7 @@ cluster_id = "1"   # cluster_dict keys are strings
 trajectory_ids = cluster_dict[cluster_id]
 print("Trajectories in cluster:", len(trajectory_ids))
 
-df = pd.read_csv("../Featureset/2024FeatsNorm.csv")
+df = pd.read_csv("../../Featureset/2024FeatsNorm.csv")
 
 # Filter only columns we need
 cols = ["trajectory_id", "lon_rel", "lat_rel", "date_time_utc", "avg_speed"]
@@ -21,13 +21,13 @@ df_small = df[cols]
 # -------------------------
 # Pick N example trajectories
 # -------------------------
-N = 9  # plot 9 example trajectories
+N = 16  # plot 9 example trajectories
 example_ids = np.random.choice(trajectory_ids, size=N, replace=False)
 
 # -------------------------
 # Plot
 # -------------------------
-fig, axes = plt.subplots(3, 3, figsize=(12, 12))
+fig, axes = plt.subplots(4, 4, figsize=(9, 9))
 axes = axes.flatten()
 
 for ax, traj_id in zip(axes, example_ids):

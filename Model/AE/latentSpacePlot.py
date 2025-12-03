@@ -52,13 +52,13 @@ def plot_umap_feature(Z_umap, feature, feature_name, cmap='viridis'):
     plt.show()
 
 def plotPureLatent():
-    Z = np.load("../Latent/latent_vectors_2.npy")
+    Z = np.load("../Latent/latent_vectors_3.npy")
     scaler = StandardScaler()
     Z_norm = scaler.fit_transform(Z)
 
     # Load your feature file (or any file with trajectory_id order)
 
-    u = umap.UMAP(n_neighbors=30, n_components=2, min_dist=0.1, metric="euclidean")
+    u = umap.UMAP(n_neighbors=30, n_components=2, min_dist=0.1, metric="euclidean", random_state=42)
     Z2 = u.fit_transform(Z_norm)
 
     # Plotting pure latent space
