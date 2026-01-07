@@ -216,9 +216,3 @@ def main():
 if __name__ == "__main__":
     main()
     
-# TODO
-# Remove ships with too few instances after each other. There should be some consecutive instances over some period of time. Maybe filtering out ships who sends out ais too rarely
-# Remove outlier points (noise)
-# Linear interpolation 
-# Autoencoder
-# Remove rows with the same timestamp!!

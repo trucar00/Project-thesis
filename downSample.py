@@ -1,56 +1,8 @@
-## Code for downsampling AIS data
-
 import pandas as pd
 from time import time
 import os
 
-""" def resample(df, step="30s"):
-    print("Resampling")
-    df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
-    #"df["mmsi"] = df["mmsi"].astype("int64")
-    check_nan = df["mmsi"].isna().sum()
-    print(check_nan, " NaN values in mmsi column")
-    df = df.sort_values(by=["mmsi", "date_time_utc"])
-    df = df.set_index("date_time_utc")
-    #print(df.head())
-
-    resampled = (
-        df.groupby("mmsi", group_keys=False)
-          .apply(lambda g: g.resample(step, origin=g.index.min()).first())
-    )
-
-    try:
-
-        resampled["mmsi"] = resampled["mmsi"].astype("int64")
-    except Exception as e:
-        print("Could not convert mmsi to int64: ", e)
-
-    resampled = resampled.reset_index()
-
-    return resampled
-
-
-df = pd.read_csv("Processed_AIS/Cleaned/2024-01.csv")
-#df_resampled = resample(df, step="30s")
-
-
-def downsample_ais(df, step="30s"):
-    # Ensure datetime format
-    df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
-    df = df.sort_values(["trajectory_id", "date_time_utc"])
-    df = df.set_index("date_time_utc")
-
-    # Resample each MMSI separately
-    resampled = (
-        df.groupby("trajectory_id", group_keys=False)
-          .apply(lambda g: g.resample(step, origin=g.index.min()).first())
-    )
-
-    # Fill in MMSI (lost due to NaN in resampling)
-    resampled["mmsi"] = resampled["mmsi"].fillna(method="ffill").astype("int64")
-    resampled = resampled.reset_index()
-
-    return resampled """
+# --- Code for downsampling AIS data ---
 
 def downsample(df, step="30s"):
     # Ensure datetime format
@@ -64,7 +16,7 @@ def downsample(df, step="30s"):
 
         # Interpolate only numeric columns (lon, lat, speed, etc.)
         num_cols = g_res.select_dtypes(include="number").columns
-        g_res[num_cols] = g_res[num_cols].interpolate(method="linear")
+        g_res[num_cols] = g_res[num_cols].interpolate(method="linear") # Linear interpolation to fill missing values
 
         # Fill remaining NaNs (like mmsi, ship_name) via forward/backward fill
         g_res = g_res.ffill().bfill()
