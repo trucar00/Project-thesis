@@ -1,6 +1,8 @@
 import pandas as pd
 import h5py
 
+# Can be a part of buildTrainingSet!
+
 df = pd.read_csv("../Featureset/2024FeatsNorm.csv")
 
 df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
