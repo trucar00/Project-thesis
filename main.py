@@ -38,7 +38,9 @@ def main():
     downSample.main()
     buildTrainingSets.main() # need fixing
     autoencoder.main()
-
+    #latent_plot
+    #cluster_plot
+    #example trajectories
     # MODEL
         # AE
         # UMAP

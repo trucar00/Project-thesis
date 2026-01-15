@@ -3,11 +3,9 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
-import matplotlib
-import json
 
-def dfForPlot():
-    df = pd.read_csv("../../Featureset/2024FeatsNorm6h.csv")
+def dfForPlot(featureset_path):
+    df = pd.read_csv(featureset_path)
 
     df_traj = df.groupby("trajectory_id").agg({
         "avg_speed": "first",
@@ -32,7 +30,7 @@ def dfForPlot():
     df_traj = df_traj.merge(delcog_sum_abs, on="trajectory_id")
     df_traj = df_traj.merge(delcog_activity, on="trajectory_id")
 
-    print(df_traj.head())
+    #print(df_traj.head())
     return df_traj
 
 
@@ -49,16 +47,14 @@ def plot_umap_feature(Z_umap, feature, feature_name, cmap='viridis'):
     cbar.ax.tick_params(labelsize=30)
     plt.xlabel("UMAP-1", fontsize=30)
     plt.ylabel("UMAP-2", fontsize=30)
-    #plt.xlim([7.5, 17.5])
-    #plt.ylim([4.9, 17.5])
     plt.xticks(fontsize=30)
     plt.yticks(fontsize=30)
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.tight_layout()
     plt.show()
 
-def plotPureLatent():
-    Z = np.load("../Latent/lat_6h_64_sin_dim.npy")
+def plotPureLatent(latent_space_path):
+    Z = np.load(latent_space_path)
     print("Any NaNs?:", np.isnan(Z).any())
     print("NaN count:", np.isnan(Z).sum())
     print("Any inf?:", np.isinf(Z).any())
@@ -76,8 +72,6 @@ def plotPureLatent():
     ax.scatter(Z2[:,0], Z2[:,1], s=4)
     ax.set_xlabel("UMAP-1", fontsize=30)
     ax.set_ylabel("UMAP-2", fontsize=30)
-    #ax.set_xlim(7.5, 17.5)
-    #ax.set_ylim(4.9, 17.5)
 
     ax.tick_params(labelsize=30)
     ax.grid(True, linestyle='--', alpha=0.5)
@@ -86,11 +80,12 @@ def plotPureLatent():
     return Z2
 
 
-if __name__ == "__main__":
-    df_traj = dfForPlot()
-    Z2 = plotPureLatent()
+def main(latent_space_path, featureset_path):
+    df_traj = dfForPlot(featureset_path)
+    Z2 = plotPureLatent(latent_space_path)
     plot_umap_feature(Z2, df_traj["avg_speed"], "avg_speed")
     plot_umap_feature(Z2, df_traj["std_speed"], "std_speed")
-    #plot_umap_feature(Z2, df_traj["delcog_mean_abs"], "delcog mean abs")
-    #plot_umap_feature(Z2, df_traj["delcog_sum_abs"], "delcog sum abs")
     plot_umap_feature(Z2, df_traj["delcog_activity"], "delcog activity")
+
+if __name__ == "__main__":
+    main(latent_space_path="../../Latent/2024norm6h.csv", featureset_path="../../Featureset/2024norm6h.csv")
