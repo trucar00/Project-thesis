@@ -5,17 +5,17 @@ from time import time
 # --- Gets the copy of NTNUs AIS-data from Kystverket ---
 # --- readFilterSave() reads the parquet files, and filters out fishing vessels within region ---
 
-def main():
+def main(months, days, filtered_path):
     start = time()
     print("Getting data from NTNUs copy of AIS-data from Kystverket.")
-    for month in range(1,13):
-        for day in range(1, 6):
+    for month in range(1,months+1):
+        for day in range(1, days+1):
             filepath = f"Z:date_utc=2024-{month:02d}-{day:02d}"
             if os.path.exists(filepath):
                 for entry in os.scandir(filepath):
                     if entry.is_file() and entry.name.endswith(".parquet"):
                         print("Processing file: ", entry.path)
-                        dataProcessing.readFilterSave(entry.path, f"Processed_AIS/Parquets/2024-{month:02d}-{day:02d}.parquet")
+                        dataProcessing.readFilterSave(entry.path, f"{filtered_path}{month:02d}-{day:02d}.parquet")
                         
             else:
                 print("Missing: ", filepath)
@@ -25,4 +25,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(months=12, days=5, filtered_path="2024")

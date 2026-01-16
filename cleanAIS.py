@@ -68,7 +68,7 @@ def split_sparse_trajectories(df, interval=30): # Many trajectories have breaks 
     return df.drop(columns=["dt", "chunk_id"])
 
 
-def remove_sparse_trajectories(df, interval=30):
+def remove_sparse_trajectories(df, interval=60):
     print(f"Removing trajectories with message interval > {interval} seconds")
 
     df = df.sort_values(["trajectory_id", "date_time_utc"])
@@ -185,7 +185,7 @@ def reindex_trajectory_ids(df):
     df = df.drop(columns=["trajectory_id_new"])
     return df
 
-def remove_short_trajectories(df, h=3):
+def remove_short_trajectories(df, traj_length):
     df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
 
     durations = (
@@ -194,7 +194,7 @@ def remove_short_trajectories(df, h=3):
       .assign(duration=lambda x: x["max"] - x["min"])
     )
 
-    valid_traj_ids = durations[durations["duration"] >= pd.Timedelta(hours=h)].index
+    valid_traj_ids = durations[durations["duration"] >= pd.Timedelta(hours=traj_length)].index
     df_filtered = df[df["trajectory_id"].isin(valid_traj_ids)]
     print("Original:", df["trajectory_id"].nunique())
     print("Filtered:", df_filtered["trajectory_id"].nunique())
@@ -202,30 +202,27 @@ def remove_short_trajectories(df, h=3):
     return df_filtered
 
 
-def all(df):
+def all(df, traj_length):
     df = remove_invalid(df)
     df = remove_stationary(df)
     df = extract_trajectories(df)
     df = split_sparse_trajectories(df)
-    #df = remove_sparse_trajectories(df)
-    #df = remove_trajectories_few_instances(df)
-    #df = reindex_trajectory_ids(df)
     df = remove_duplicate_timestamps(df)
     df = remove_outlier_positions(df)
-    df = remove_short_trajectories(df) # This removes a lot of trajectories. So we are left with not sequential chunk ids etc
+    df = remove_short_trajectories(df, traj_length) # This removes a lot of trajectories. So we are left with not sequential chunk ids etc
     df = reindex_trajectory_ids(df)
     return df
 
-def main():
+def main(months, concat_path, cleaned_path, traj_length):
     start = time()
 
-    for month in range(1,13):
-        getfile = f"Processed_AIS/Concatenated/2024-{month:02d}.parquet"
-        savefile = f"Processed_AIS/Cleaned3h/2024-{month:02d}.csv" # Remove
+    for month in range(1,months+1):
+        getfile = f"{concat_path}{month:02d}.parquet"
+        savefile = f"{cleaned_path}{month:02d}.csv" # Remove
         if os.path.exists(getfile):
             print("Cleaning up: ", getfile)
             df = pd.read_parquet(getfile, engine="pyarrow")
-            df = all(df)
+            df = all(df, traj_length)
             df.to_csv(savefile, index=False)
             print("Saved cleaned data to: ", savefile)          
         else:

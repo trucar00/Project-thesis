@@ -4,7 +4,7 @@ import os
 
 # --- Code for downsampling AIS data ---
 
-def downsample(df, step="30s"):
+def downsample(df, step):
     # Ensure datetime format
     df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
     df = df.sort_values(["trajectory_id", "date_time_utc"])
@@ -34,16 +34,16 @@ def downsample(df, step="30s"):
     return resampled
 
 
-def main():
+def main(cleaned_path, resmapled_path, step):
     start = time()
 
     for month in range(1,13):
-        getfile = f"Processed_AIS/Cleaned/2024-{month:02d}.csv"
-        savefile = f"Processed_AIS/Resampled/2024-{month:02d}.csv"
+        getfile = f"{cleaned_path}{month:02d}.csv"
+        savefile = f"{resmapled_path}{month:02d}.csv"
         if os.path.exists(getfile):
             print("Resampling: ", getfile)
             df = pd.read_csv(getfile, engine="pyarrow")
-            df = downsample(df)
+            df = downsample(df, step)
             df.to_csv(savefile, index=False)
             print(f"Saved resampled data for 2024-{month:02d} to {savefile}")          
         else:

@@ -10,7 +10,7 @@ def angle_wrap(a):
     return (a + 180) % 360 - 180
 
 
-def build(df):
+def build(df, traj_length):
     df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
 
     df["del_cog"] = df.groupby("trajectory_id")["cog"].diff().apply(angle_wrap)
@@ -18,8 +18,8 @@ def build(df):
     df["accel_bwd"] = df["accel_bwd"].fillna(0)
     df["rot"] = df["rot"].fillna(0)
 
-    window_length = pd.Timedelta(hours=6)
-    step = pd.Timedelta(minutes=2*60) # Good value ?
+    window_length = pd.Timedelta(hours=traj_length)
+    step = pd.Timedelta(minutes=(traj_length/2)*60) # Good value ?
     
     all_windows = []
     
@@ -57,13 +57,13 @@ def build(df):
     df_all = df_all.sort_values(by=["trajectory_id", "window_start"])
 
     df_all = df_all[["trajectory_id", "mmsi", "window_start", "window_end", "avg_speed", "std_speed",
-                     "date_time_utc", "speed", "del_cog", "rot", "accel_bwd", "lon_rel", "lat_rel"]] # # add avg std
+                     "date_time_utc", "speed", "del_cog", "rot", "accel_bwd", "lon_rel", "lat_rel"]] # remember to remove avg std speed here as well if 6 features
     return df_all
 
-def createCommon():
+def createCommon(months, training_path):
     dfs = []
-    for month in range(1,13):
-        filepath = f"Featureset/6h_sin_avg_std/2024-{month:02d}.csv"
+    for month in range(1,months+1):
+        filepath = f"{training_path}{month:02d}.csv"
         df = pd.read_csv(filepath)
         df["trajectory_id"] = (df["trajectory_id"].astype(str) + "-" + f"{month}")
         print(df["trajectory_id"].iloc[0])
@@ -71,32 +71,32 @@ def createCommon():
 
     concat_df = pd.concat(dfs, ignore_index=True)
     scaler = StandardScaler()
-    scaled_cols = ["speed", "del_cog", "rot", "accel_bwd", "lon_rel", "lat_rel"] # add avg std
+    scaled_cols = ["speed", "del_cog", "rot", "accel_bwd", "lon_rel", "lat_rel", "avg_speed", "std_speed"]
     concat_df[scaled_cols] = scaler.fit_transform(concat_df[scaled_cols])
     concat_df.rename(columns={c: f"z_{c}" for c in scaled_cols}, inplace=True)
     
-    concat_df.to_csv("Featureset/2024Feats6hsin.csv", index=False)
+    concat_df.to_csv(f"{training_path}2024.csv", index=False)
 
     return "Done!"
 
 
-def main():
+def main(resampled_path, training_path, months, traj_length):
     start = time()
 
-    for month in range(1,13):
-        getfile = f"Processed_AIS/Resampled6h/2024-{month:02d}.csv"
-        savefile = f"Featureset/6h_sin_avg_std/2024-{month:02d}.csv"
+    for month in range(1,months+1):
+        getfile = f"{resampled_path}{month:02d}.csv"
+        savefile = f"{training_path}{month:02d}.csv"
 
         if os.path.exists(getfile):
             print("Building features for: ", getfile)
             df = pd.read_csv(getfile, engine="pyarrow")
-            df_feats = build(df)
+            df_feats = build(df, traj_length)
             df_feats.to_csv(savefile, index=False)
             print("Saved features to: ", savefile)          
         else:
             print("Missing: ", getfile)
 
-    createCommon()
+    createCommon(months, training_path)
     end = time()
     print("Done! It took: ", (end-start)/60, " minutes.")
     return
