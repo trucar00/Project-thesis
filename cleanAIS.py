@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import math
 
+# NOTE: the original 3h dataset was created with a min_duration = 10 min not 15 min as for the 6h. In the cleaned version, we use 15 min as standard.
 
 def remove_stationary(df, speed_threshold=0.4, min_duration="10min"):
     print("Removing stationary")
@@ -54,7 +55,7 @@ def extract_trajectories(df, time_threshold="30min"):
 
     return df.drop(columns=["dt"])
 
-def split_sparse_trajectories(df, interval=30): # Many trajectories have breaks or pauses in the messages, rather than discarding them, we break them up.
+def split_sparse_trajectories(df, interval=60): # Many trajectories have breaks or pauses in the messages, rather than discarding them, we break them up.
     df["date_time_utc"] = pd.to_datetime(df["date_time_utc"])
     df = df.sort_values(["trajectory_id", "date_time_utc"])
     df["dt"] = df.groupby("trajectory_id")["date_time_utc"].diff().dt.total_seconds()
@@ -67,6 +68,7 @@ def split_sparse_trajectories(df, interval=30): # Many trajectories have breaks 
     
     return df.drop(columns=["dt", "chunk_id"])
 
+# NOTE: the original 3h dataset was created with a split on a 30s interval not 60s as for the 6h. In the cleaned version we use 60 as standard resulting in more trajectories. 
 
 def remove_sparse_trajectories(df, interval=60):
     print(f"Removing trajectories with message interval > {interval} seconds")
@@ -218,7 +220,7 @@ def main(months, concat_path, cleaned_path, traj_length):
 
     for month in range(1,months+1):
         getfile = f"{concat_path}{month:02d}.parquet"
-        savefile = f"{cleaned_path}{month:02d}.csv" # Remove
+        savefile = f"{cleaned_path}{month:02d}baluba.csv" # Remove
         if os.path.exists(getfile):
             print("Cleaning up: ", getfile)
             df = pd.read_parquet(getfile, engine="pyarrow")

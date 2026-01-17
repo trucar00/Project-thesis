@@ -19,7 +19,7 @@ def build(df, traj_length):
     df["rot"] = df["rot"].fillna(0)
 
     window_length = pd.Timedelta(hours=traj_length)
-    step = pd.Timedelta(minutes=(traj_length/2)*60) # Good value ?
+    step = pd.Timedelta(minutes=(traj_length/3)*60) # Good value ?
     
     all_windows = []
     
@@ -66,7 +66,6 @@ def createCommon(months, training_path):
         filepath = f"{training_path}{month:02d}.csv"
         df = pd.read_csv(filepath)
         df["trajectory_id"] = (df["trajectory_id"].astype(str) + "-" + f"{month}")
-        print(df["trajectory_id"].iloc[0])
         dfs.append(df)
 
     concat_df = pd.concat(dfs, ignore_index=True)
@@ -75,7 +74,7 @@ def createCommon(months, training_path):
     concat_df[scaled_cols] = scaler.fit_transform(concat_df[scaled_cols])
     concat_df.rename(columns={c: f"z_{c}" for c in scaled_cols}, inplace=True)
     
-    concat_df.to_csv(f"{training_path}2024.csv", index=False)
+    concat_df.to_csv(f"{training_path}2024FullTrainingSet.csv", index=False)
 
     return "Done!"
 

@@ -116,7 +116,7 @@ def architecture_6h(T=720, F=8, latent_dim=64): # 6h * 60 * 2 = 720, F = 8 featu
     return autoencoder, encoder
 
 
-def train_model(trajectories_path, autoencoder, encoder, ae_path, latent_path):
+def train_model(trajectories_path, autoencoder, encoder, ae_path):
     print("Training model.")
     with h5py.File(trajectories_path, "r") as h5:
         N = len(h5["X"])
@@ -154,21 +154,21 @@ def train_model(trajectories_path, autoencoder, encoder, ae_path, latent_path):
         # Vectorized batch encoding
         latent_vectors = encoder.predict(X_all, batch_size=512, verbose=1)
 
-    np.save(latent_path, latent_vectors)
+    np.save(ae_path, latent_vectors)
     print("Successfully saved the latent vectors")
 
 
-def main(trajectories_path, ae_path, latent_path, hours="3h"):
+def main(trajectories_path, ae_path, traj_length):
     print("Setting up architecture.")
-    if hours == "3h":
+    if traj_length == 3:
         autoencoder, encoder = architecture_3h()
-    elif hours == "6h":
+    elif traj_length == 6:
         autoencoder, encoder = architecture_6h()
     else:
         print("Please specify either the 3h or 6h trajectories.")
         return
     
-    train_model(trajectories_path, autoencoder, encoder, ae_path, latent_path)
+    train_model(trajectories_path, autoencoder, encoder, ae_path)
 
 
 if __name__ == "__main__":

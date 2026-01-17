@@ -5,6 +5,7 @@ import downSample
 import buildTrainingSets
 import autoencoder
 from pathlib import Path
+import makeh5
 
 # Need folder paths, anc creation of these folders if they dont exist?
 
@@ -17,11 +18,14 @@ TRAJECTORY_LENGTH = 3
 RESAMPLE_STEP = "30s"
 
 AIS_PATH = f"Z:date_utc={YEAR}"
-FILTERED_PATH = f"Processed_AIS_{YEAR}/Parquets_{TRAJECTORY_LENGTH}h/"
-CONCAT_PATH = f"Processed_AIS_{YEAR}/Concatenated_{TRAJECTORY_LENGTH}h/"
+FILTERED_PATH = f"Processed_AIS_{YEAR}/Parquets/"
+CONCAT_PATH = f"Processed_AIS_{YEAR}/Concatenated/"
 CLEAN_PATH = f"Processed_AIS_{YEAR}/Cleaned_{TRAJECTORY_LENGTH}h/"
 RESAMPLE_PATH = f"Processed_AIS_{YEAR}/Resampled_{TRAJECTORY_LENGTH}h/"
 TRAINING_SETS_PATH = f"Training_sets_{YEAR}/{TRAJECTORY_LENGTH}h/"
+TRAJECTORIES_PATH = f"{TRAINING_SETS_PATH}trajectories.h5"
+AUTOENCODER_PATH = f"Model/{TRAJECTORY_LENGTH}h/"
+#LATENT_PATH = f"Model/{TRAJECTORY_LENGTH}h/"
 
 def main():
     folder_paths = [FILTERED_PATH, CONCAT_PATH, CLEAN_PATH, RESAMPLE_PATH, TRAINING_SETS_PATH]
@@ -37,10 +41,11 @@ def main():
 
     #getData.main(months=MONTHS, days=DAYS, filtered_path=FILTERED_PATH)
     #concatParquets.main(months=MONTHS, days=DAYS, filtered_path=FILTERED_PATH, concat_path=CONCAT_PATH)
-    cleanAIS.main(months=MONTHS, concat_path=CONCAT_PATH, cleaned_path=CLEAN_PATH, traj_length=TRAJECTORY_LENGTH)
-    downSample.main(cleaned_path=CLEAN_PATH, resmapled_path=RESAMPLE_PATH, step=RESAMPLE_STEP)
-    buildTrainingSets.main(resampled_path=RESAMPLE_PATH, training_path=TRAINING_SETS_PATH, months=MONTHS, traj_length=TRAJECTORY_LENGTH)
-    #autoencoder.main()
+    #cleanAIS.main(months=MONTHS, concat_path=CONCAT_PATH, cleaned_path=CLEAN_PATH, traj_length=TRAJECTORY_LENGTH)
+    #downSample.main(cleaned_path=CLEAN_PATH, resmapled_path=RESAMPLE_PATH, step=RESAMPLE_STEP)
+    #buildTrainingSets.main(resampled_path=RESAMPLE_PATH, training_path=TRAINING_SETS_PATH, months=MONTHS, traj_length=TRAJECTORY_LENGTH)
+    #makeh5.createh5(training_path=TRAINING_SETS_PATH, traj_length=TRAJECTORY_LENGTH, trajectories_path=H5_PATH)
+    autoencoder.main(trajectories_path=TRAJECTORIES_PATH, ae_path=AUTOENCODER_PATH, traj_length=TRAJECTORY_LENGTH)
     #latent_plot
     #cluster_plot
     #example trajectories
