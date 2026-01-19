@@ -6,6 +6,8 @@ import buildTrainingSets
 import autoencoder
 from pathlib import Path
 import makeh5
+import latentSpacePlot
+import clusterFunc
 
 # Need folder paths, anc creation of these folders if they dont exist?
 
@@ -25,6 +27,7 @@ RESAMPLE_PATH = f"Processed_AIS_{YEAR}/Resampled_{TRAJECTORY_LENGTH}h/"
 TRAINING_SETS_PATH = f"Training_sets_{YEAR}/{TRAJECTORY_LENGTH}h/"
 TRAJECTORIES_PATH = f"{TRAINING_SETS_PATH}trajectories.h5"
 AUTOENCODER_PATH = f"Model/{TRAJECTORY_LENGTH}h/"
+CLUSTER_PATH = f"clusters_{TRAJECTORY_LENGTH}h.json"
 #LATENT_PATH = f"Model/{TRAJECTORY_LENGTH}h/"
 
 def main():
@@ -46,14 +49,9 @@ def main():
     #buildTrainingSets.main(resampled_path=RESAMPLE_PATH, training_path=TRAINING_SETS_PATH, months=MONTHS, traj_length=TRAJECTORY_LENGTH)
     #makeh5.createh5(training_path=TRAINING_SETS_PATH, traj_length=TRAJECTORY_LENGTH, trajectories_path=H5_PATH)
     autoencoder.main(trajectories_path=TRAJECTORIES_PATH, ae_path=AUTOENCODER_PATH, traj_length=TRAJECTORY_LENGTH)
-    #latent_plot
+    latentSpacePlot.main(latent_space_path=AUTOENCODER_PATH, featureset_path=TRAINING_SETS_PATH)
+    clusterFunc.main(latent_space_path=AUTOENCODER_PATH, featureset_path=TRAINING_SETS_PATH, clusters_path=CLUSTER_PATH, saveClusters=True)
     #cluster_plot
-    #example trajectories
-    # MODEL
-        # AE
-        # UMAP
-        # Clustering
-        # Plot clustering?
 
 
 if __name__ == "__main__":
