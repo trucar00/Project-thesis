@@ -1,5 +1,5 @@
 import os
-import dataProcessing
+from . import dataProcessing
 from time import time
 
 # --- Gets the copy of NTNUs AIS-data from Kystverket ---

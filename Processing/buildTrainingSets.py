@@ -1,7 +1,7 @@
 import pandas as pd
 from time import time
 import os
-import cleanAIS
+from . import cleanAIS
 from sklearn.preprocessing import StandardScaler
 
 

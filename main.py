@@ -1,13 +1,6 @@
-import getData
-import concatParquets
-import cleanAIS
-import downSample
-import buildTrainingSets
-import autoencoder
 from pathlib import Path
-import makeh5
-import latentSpacePlot
-import clusterFunc
+from Processing import getData, concatParquets, cleanAIS, downSample, buildTrainingSets, makeh5
+from Model import autoencoder, latentSpacePlot, clusterFunc
 
 # Need folder paths, anc creation of these folders if they dont exist?
 
@@ -42,12 +35,12 @@ def main():
             path.mkdir(parents=True)
             print(f"[CREATED] {path}")
 
-    #getData.main(months=MONTHS, days=DAYS, filtered_path=FILTERED_PATH)
-    #concatParquets.main(months=MONTHS, days=DAYS, filtered_path=FILTERED_PATH, concat_path=CONCAT_PATH)
-    #cleanAIS.main(months=MONTHS, concat_path=CONCAT_PATH, cleaned_path=CLEAN_PATH, traj_length=TRAJECTORY_LENGTH)
-    #downSample.main(cleaned_path=CLEAN_PATH, resmapled_path=RESAMPLE_PATH, step=RESAMPLE_STEP)
-    #buildTrainingSets.main(resampled_path=RESAMPLE_PATH, training_path=TRAINING_SETS_PATH, months=MONTHS, traj_length=TRAJECTORY_LENGTH)
-    #makeh5.createh5(training_path=TRAINING_SETS_PATH, traj_length=TRAJECTORY_LENGTH, trajectories_path=H5_PATH)
+    getData.main(months=MONTHS, days=DAYS, filtered_path=FILTERED_PATH)
+    concatParquets.main(months=MONTHS, days=DAYS, filtered_path=FILTERED_PATH, concat_path=CONCAT_PATH)
+    cleanAIS.main(months=MONTHS, concat_path=CONCAT_PATH, cleaned_path=CLEAN_PATH, traj_length=TRAJECTORY_LENGTH)
+    downSample.main(cleaned_path=CLEAN_PATH, resmapled_path=RESAMPLE_PATH, step=RESAMPLE_STEP)
+    buildTrainingSets.main(resampled_path=RESAMPLE_PATH, training_path=TRAINING_SETS_PATH, months=MONTHS, traj_length=TRAJECTORY_LENGTH)
+    makeh5.createh5(training_path=TRAINING_SETS_PATH, traj_length=TRAJECTORY_LENGTH, trajectories_path=TRAJECTORIES_PATH)
     autoencoder.main(trajectories_path=TRAJECTORIES_PATH, ae_path=AUTOENCODER_PATH, traj_length=TRAJECTORY_LENGTH)
     latentSpacePlot.main(latent_space_path=AUTOENCODER_PATH, featureset_path=TRAINING_SETS_PATH)
     clusterFunc.main(latent_space_path=AUTOENCODER_PATH, featureset_path=TRAINING_SETS_PATH, clusters_path=CLUSTER_PATH, saveClusters=True)
